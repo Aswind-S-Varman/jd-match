@@ -1,0 +1,19 @@
+Backend Developer
+
+We are looking for a Backend Developer to join our platform team.
+
+Requirements:
+- 2+ years experience with Python
+- Strong SQL and database design skills
+- Experience building and consuming REST APIs
+- Familiarity with cloud platforms, preferably AWS
+- Experience with Docker and CI/CD pipelines
+- Knowledge of Kubernetes is a plus
+- Comfortable working in an Agile environment
+
+Responsibilities:
+- Design and maintain microservices
+- Write unit and integration tests
+- Participate in code reviews
+
+
