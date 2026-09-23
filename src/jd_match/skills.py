@@ -55,6 +55,11 @@ SKILLS: dict[str, set[str]] = {
     "oauth": {"oauth", "oauth2", "openid connect"},
     "jwt": {"jwt", "json web token"},
     "openapi": {"openapi", "swagger"},
+    "kubernetes": {"kubernetes", "k8s"},
+    "terraform": {"terraform"},
+    "ansible": {"ansible"},
+    "ci/cd": {"ci/cd", "cicd", "continuous integration", "continuous delivery"},
+
 }
 
 # Reverse lookup so a matched alias resolves back to its canonical name.
