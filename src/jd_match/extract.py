@@ -7,6 +7,9 @@ from pypdf import PdfReader
 MAX_BYTES = 5 * 1024 * 1024
 SUPPORTED = {".txt", ".md", ".docx", ".pdf"}
 
+# Shorter than any genuine resume or posting, so anything below this is a failed text layer.
+MIN_PDF_CHARS = 50
+
 
 class ExtractionError(Exception):
     """Raised when a file cannot be read as text."""
@@ -50,8 +53,18 @@ def _from_docx(data: bytes) -> str:
 def _from_pdf(data: bytes) -> str:
     try:
         reader = PdfReader(io.BytesIO(data))
-        return "\n".join(page.extract_text() or "" for page in reader.pages)
+        text = "\n".join(page.extract_text() or "" for page in reader.pages)
     except Exception as exc:
         raise ExtractionError("Could not read the PDF file.") from exc
+
+    # An image-only PDF parses cleanly and yields nothing, which would score as 0% coverage.
+    if len(text.strip()) < MIN_PDF_CHARS:
+        raise ExtractionError(
+            "This PDF has no readable text layer, so it is almost certainly a scan or an "
+            "image export. An ATS will read it as blank. Re-export it from the original "
+            "document as a text-based PDF."
+        )
+
+    return text
 
 
