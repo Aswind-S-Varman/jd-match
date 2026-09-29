@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from . import ats_checks, matcher, report
+from . import ats_checks, matcher, report, requirements
 from .extract import ExtractionError, from_path
 
 
@@ -28,7 +28,8 @@ def main():
 
     result = matcher.compare(resume_text, job_text)
     issues = ats_checks.check(resume_path.read_bytes(), resume_path.name)
-    output = report.render(result, issues)
+    job_requirements = requirements.extract(job_text)
+    output = report.render(result, issues, job_requirements)
 
     if args.output:
         Path(args.output).write_text(output, encoding="utf-8")
