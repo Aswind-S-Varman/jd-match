@@ -18,7 +18,19 @@ def test_substrings_do_not_create_false_matches():
     assert find_skills("I am going to Google") == set()
 
 
-def test_normalize_pads_text_for_boundary_matching():
-    assert normalize("Python, SQL") == " python sql "
+def test_punctuation_does_not_hide_skills():
+    assert "python" in find_skills("We use Python.")
+    assert {"python", "java"} <= find_skills("A Python/Java shop")
+    assert "aws" in find_skills("Built AWS-based systems")
+    assert {"docker", "kubernetes"} <= find_skills("Experience with Docker, Kubernetes.")
+
+
+def test_dotted_names_do_not_leak_their_suffix():
+    assert find_skills("We use Vue.js on the frontend") == set()
+    assert "node.js" in find_skills("Built on Node.js")
+
+
+def test_normalize_lowercases_and_collapses_whitespace():
+    assert normalize("Python,\n  SQL") == "python, sql"
 
 
