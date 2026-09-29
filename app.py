@@ -1,6 +1,6 @@
 import streamlit as st
 
-from jd_match import ats_checks, matcher
+from jd_match import ats_checks, matcher, requirements
 from jd_match.extract import ExtractionError, from_bytes
 
 st.set_page_config(page_title="jd-match", page_icon="📄")
@@ -53,6 +53,30 @@ if st.button("Compare", type="primary"):
     if result.extra:
         with st.expander(f"Also in your resume, not required ({len(result.extra)})"):
             st.markdown("\n".join(f"- {s}" for s in result.extra))
+
+    extraction = requirements.extract(job_text)
+    st.subheader("Requirements read from the job description")
+    if not extraction.section_found:
+        st.info("No requirements section found in this posting, so this check was skipped.")
+    elif not extraction.requirements:
+        st.info("A requirements section was found, but no skills could be read from it.")
+    else:
+        st.write(
+            f"Recognised **{len(extraction.recognised)} of "
+            f"{len(extraction.requirements)}** ({extraction.recognition:.0%})"
+        )
+        if extraction.unrecognised:
+            st.warning(
+                "These look required but are not in the skill vocabulary, "
+                "so they were not checked against your resume. "
+                "Treat the coverage figure above as approximate."
+            )
+            st.markdown(
+                "\n".join(
+                    f"- {r.text}" + (" _(optional)_" if r.optional else "")
+                    for r in extraction.unrecognised
+                )
+            )
 
     st.subheader("ATS parseability")
     if issues:
