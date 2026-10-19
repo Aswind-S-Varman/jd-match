@@ -1,2 +1,55 @@
 [server]
 maxUploadSize = 5
+
+# Minimalist Modern: Calistoga display over Inter body, Electric Blue as the single accent.
+# Greys are kept hue-neutral so the blue accent and the status colours are the only
+# hues on screen. A blue-tinted slate made the accent read as another shade of the
+# background rather than as a colour.
+[theme]
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "Calistoga:https://fonts.googleapis.com/css2?family=Calistoga&display=swap"
+codeFont = "'JetBrains Mono':https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+
+# Calistoga ships a single weight, so anything above 400 would be synthetically bolded.
+headingFontWeights = [400, 400, 400, 400, 400, 400]
+headingFontSizes = ["2.5rem", "2rem", "1.75rem", "1.375rem", "1.125rem", "1rem"]
+
+baseRadius = "0.75rem"
+buttonRadius = "0.75rem"
+metricValueFontSize = "2.75rem"
+metricValueFontWeight = 600
+showWidgetBorder = true
+
+[theme.light]
+primaryColor = "#0052FF"
+backgroundColor = "#FAFAFA"
+secondaryBackgroundColor = "#F0F0F2"
+textColor = "#16171A"
+borderColor = "#E2E2E6"
+linkColor = "#0052FF"
+dataframeHeaderBackgroundColor = "#F0F0F2"
+
+# Only the hues the app actually renders. Streamlit derives each badge fill and
+# text colour from these, so the paired options are left unset.
+greenColor = "#0E9F6E"
+redColor = "#E02424"
+orangeColor = "#D97706"
+grayColor = "#6B7280"
+
+# Primary shifts to the gradient's lighter endpoint: #0052FF on charcoal is only 2.6:1.
+[theme.dark]
+primaryColor = "#4D7CFF"
+backgroundColor = "#131316"
+secondaryBackgroundColor = "#1C1C21"
+textColor = "#E8E8EB"
+borderColor = "#2C2C33"
+linkColor = "#4D7CFF"
+dataframeHeaderBackgroundColor = "#1C1C21"
+
+greenColor = "#31C48D"
+redColor = "#F05252"
+orangeColor = "#F59E0B"
+grayColor = "#9CA3AF"
+
+
+

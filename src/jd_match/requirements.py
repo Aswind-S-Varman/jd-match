@@ -1,12 +1,16 @@
 """Requirements read from the job description itself, so unknown terms stay visible.
 
+
 The skill vocabulary is used here to recognise terms, never to decide which terms count.
 """
+
 
 import re
 from dataclasses import dataclass
 
+
 from .keywords import find_skills
+
 
 _SECTION_START = re.compile(
     r"^\s*(requirements|qualifications|skills|what you.?ll need|"
@@ -24,6 +28,7 @@ _OPTIONAL = re.compile(
 )
 _TOKEN = re.compile(r"[A-Za-z0-9][A-Za-z0-9+#./-]*")
 
+
 # Prose that survives the capitalisation filter because it sits mid-line or reads as an acronym.
 _STOP = frozenset(
     {
@@ -34,15 +39,20 @@ _STOP = frozenset(
 )
 
 
+
+
 @dataclass(frozen=True)
 class Requirement:
     text: str
     skill: str | None
     optional: bool
 
+
     @property
     def recognised(self) -> bool:
         return self.skill is not None
+
+
 
 
 @dataclass(frozen=True)
@@ -50,15 +60,18 @@ class Extraction:
     requirements: tuple[Requirement, ...]
     section_found: bool
 
+
     @property
     def recognised(self) -> list[Requirement]:
         return [r for r in self.requirements if r.recognised]
+
 
     @property
     def unrecognised(self) -> list[Requirement]:
         return sorted(
             (r for r in self.requirements if not r.recognised), key=lambda r: r.text.lower()
         )
+
 
     @property
     def recognition(self) -> float:
@@ -67,10 +80,13 @@ class Extraction:
         return len(self.recognised) / len(self.requirements)
 
 
+
+
 def extract(job_text: str) -> Extraction:
     lines = _requirement_lines(job_text)
     if lines is None:
         return Extraction((), section_found=False)
+
 
     found: dict[str, Requirement] = {}
     for line, optional in lines:
@@ -81,13 +97,17 @@ def extract(job_text: str) -> Extraction:
             if seen is None or (seen.optional and not optional):
                 found[key] = Requirement(text=text, skill=skill, optional=optional)
 
+
     return Extraction(tuple(found.values()), section_found=True)
+
+
 
 
 def _requirement_lines(text: str) -> list[tuple[str, bool]] | None:
     """Bullets under a requirements heading, or None when no such heading exists."""
     lines: list[tuple[str, bool]] = []
     active = seen_heading = False
+
 
     for raw in text.splitlines():
         if _SECTION_START.search(raw):
@@ -101,7 +121,10 @@ def _requirement_lines(text: str) -> list[tuple[str, bool]] | None:
             if line:
                 lines.append((line, bool(_OPTIONAL.search(line))))
 
+
     return lines if seen_heading else None
+
+
 
 
 def _candidates(line: str) -> list[tuple[str, str | None]]:
@@ -109,11 +132,19 @@ def _candidates(line: str) -> list[tuple[str, str | None]]:
     consumed = [False] * len(tokens)
     out: list[tuple[str, str | None]] = []
 
+
     # Vocabulary first, consuming what it claims, so "REST APIs" cannot also yield "REST".
     i = 0
     while i < len(tokens):
         pair = " ".join(tokens[i : i + 2])
-        if i + 1 < len(tokens) and (hits := find_skills(pair)):
+        # A pair only earns its place when neither half means the same alone, so the
+        # filler in "an Agile" is dropped and "REST APIs" survives whole.
+        if (
+            i + 1 < len(tokens)
+            and (hits := find_skills(pair))
+            and find_skills(tokens[i]) != hits
+            and find_skills(tokens[i + 1]) != hits
+        ):
             out += [(pair, skill) for skill in sorted(hits)]
             consumed[i] = consumed[i + 1] = True
             i += 2
@@ -122,6 +153,7 @@ def _candidates(line: str) -> list[tuple[str, str | None]]:
             out += [(tokens[i], skill) for skill in sorted(hits)]
             consumed[i] = True
         i += 1
+
 
     # Then harvest survivors that still look like product names.
     i = 0
@@ -142,21 +174,25 @@ def _candidates(line: str) -> list[tuple[str, str | None]]:
         out.append((term, None))
         i += 1
 
+
     return out
+
+
 
 
 def _has_signal(token: str, first: bool) -> bool:
     if len(token) < 2 or not any(c.isalpha() for c in token) or token.lower() in _STOP:
         return False
 
+
     acronym = token.isupper() and len(token) <= 6
     symbolic = any(c in token for c in "+#./")
     titled = token[:1].isupper() and not token.isupper()
+
 
     # Bullets open with a capital, so a plain capitalised first word is prose, not a skill.
     if first and titled and not symbolic:
         return False
 
+
     return acronym or symbolic or titled
-
-
