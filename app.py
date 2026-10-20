@@ -1,13 +1,9 @@
 import streamlit as st
 
-
 from jd_match import ats_checks, matcher, requirements
 from jd_match.extract import ExtractionError, from_bytes
 
-
 st.set_page_config(page_title="jd-match", page_icon="📄", layout="centered")
-
-
 
 
 @st.cache_data(show_spinner="Reading your resume and the posting\u2026")
@@ -21,8 +17,6 @@ def analyse(data: bytes, filename: str, job_text: str):
     )
 
 
-
-
 def badges(items: list[str], color: str, icon: str = "") -> None:
     """Canonical skill names only. Uploaded text goes in a dataframe, not badge syntax."""
     if not items:
@@ -32,14 +26,11 @@ def badges(items: list[str], color: str, icon: str = "") -> None:
     st.markdown(" ".join(f":{color}-badge[{prefix}{item}]" for item in sorted(items)))
 
 
-
-
 st.title("jd-match")
 st.markdown(
     ":gray[Compare a resume against a job description. "
     "Files are processed in memory and never stored.]"
 )
-
 
 with st.form("compare"):
     upload_col, paste_col = st.columns([1, 1.3], gap="large")
@@ -55,7 +46,6 @@ with st.form("compare"):
         icon=":material/compare_arrows:",
         width="stretch",
     )
-
 
 if submitted:
     st.session_state.pop("outcome", None)
@@ -73,7 +63,6 @@ if submitted:
         except ExtractionError as exc:
             st.session_state["problem"] = ("error", str(exc))
 
-
 problem = st.session_state.get("problem")
 if problem:
     kind, message = problem
@@ -81,7 +70,6 @@ if problem:
         st.warning(message, icon=":material/warning:")
     else:
         st.error(message, icon=":material/report:")
-
 
 outcome = st.session_state.get("outcome")
 if not outcome:
@@ -92,22 +80,18 @@ if not outcome:
         )
     st.stop()
 
-
 result, issues, extraction = outcome
 severity = "none"
 if issues:
     severity = "high" if any(i.severity == "high" for i in issues) else "medium"
 
-
 coverage_col, ats_col = st.columns(2, gap="medium")
-
 
 with coverage_col:
     with st.container(border=True, height="stretch"):
         st.metric("Keyword coverage", f"{result.coverage:.0%}", icon=":material/checklist:")
         st.progress(result.coverage)
         st.caption(f"{len(result.matched)} of {result.required_count} required skills")
-
 
 with ats_col:
     with st.container(border=True, height="stretch"):
@@ -124,7 +108,6 @@ with ats_col:
                 f"[:material/warning: {severity.capitalize()} severity]"
             )
 
-
 skills_tab, requirements_tab, ats_tab = st.tabs(
     [
         f"Skills ({len(result.matched)}/{result.required_count})",
@@ -138,7 +121,6 @@ skills_tab, requirements_tab, ats_tab = st.tabs(
     ]
 )
 
-
 with skills_tab:
     missing_col, matched_col = st.columns(2, gap="large")
     with missing_col:
@@ -150,11 +132,9 @@ with skills_tab:
             st.markdown(f"#### Matched ({len(result.matched)})")
             badges(result.matched, "green", ":material/check:")
 
-
     if result.extra:
         with st.expander(f"Also in your resume, not required ({len(result.extra)})"):
             badges(result.extra, "gray")
-
 
 with requirements_tab:
     if not extraction.section_found:
@@ -179,7 +159,6 @@ with requirements_tab:
             "requirements recognised by the skill vocabulary"
         )
 
-
         if extraction.unrecognised:
             st.warning(
                 "Some requirements are not in the skill vocabulary, so they were not "
@@ -191,7 +170,6 @@ with requirements_tab:
                 "Every requirement in this posting was recognised.",
                 icon=":material/check_circle:",
             )
-
 
         st.dataframe(
             [
@@ -220,7 +198,6 @@ with requirements_tab:
             },
         )
 
-
 with ats_tab:
     if not issues:
         st.success("No structural issues detected.", icon=":material/check_circle:")
@@ -230,11 +207,3 @@ with ats_tab:
                 st.error(issue.message, icon=":material/report:")
             else:
                 st.warning(issue.message, icon=":material/warning:")
-
-
-
-
-
-
-
-
